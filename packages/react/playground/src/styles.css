@@ -1,0 +1,78 @@
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color-scheme: light dark;
+}
+body {
+  margin: 0;
+  padding: 2rem;
+  background: #f7f7f8;
+  color: #1a1a1a;
+}
+@media (prefers-color-scheme: dark) {
+  body { background: #111; color: #eee; }
+}
+.shell {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.75rem;
+}
+.tabs button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  color: inherit;
+}
+.tabs button[aria-selected="true"] {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
+}
+@media (prefers-color-scheme: dark) {
+  .tabs button[aria-selected="true"] { background: #eee; color: #111; border-color: #eee; }
+}
+.panel {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+@media (prefers-color-scheme: dark) {
+  .panel { background: #1a1a1a; border-color: #333; }
+}
+.panel h2 { margin-top: 0; }
+.panel p.hint { color: #666; }
+.panel pre {
+  background: #f0f0f0;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow: auto;
+}
+@media (prefers-color-scheme: dark) {
+  .panel pre { background: #222; }
+}
+select, button.action {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  select, button.action { background: #222; color: #eee; border-color: #555; }
+}
