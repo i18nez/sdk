@@ -6,9 +6,9 @@
     "packages/react/playground"
   ],
   "scripts": {
-    "build": "bun run --filter '@i18nez/*' build",
-    "test": "bun run --filter '@i18nez/*' test",
-    "typecheck": "bun run --filter '@i18nez/*' typecheck",
+    "build": "bun run --filter '@i18nez/core' build && bun run --filter '@i18nez/react' build",
+    "test": "bun run build && bun run --filter '@i18nez/*' test",
+    "typecheck": "bun run build && bun run --filter '@i18nez/*' typecheck",
     "link:all": "cd packages/core && bun link && cd ../react && bun link"
   }
 }
