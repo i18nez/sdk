@@ -6,6 +6,7 @@ interface QueueItem {
   hash: string;
   targetLocale: string;
   context?: string;
+  dynamic?: boolean;
   resolvers: Array<(text: string) => void>;
   rejecters: Array<(err: unknown) => void>;
 }
@@ -32,11 +33,12 @@ export class TranslationQueue {
     hash: string,
     targetLocale: string,
     context?: string,
+    dynamic?: boolean,
   ): Promise<string> {
     if (this.destroyed) {
       return Promise.reject(new Error("Queue destroyed"));
     }
-    const key = `${targetLocale}:${hash}`;
+    const key = `${targetLocale}:${dynamic ? "d:" : "s:"}${hash}`;
     return new Promise<string>((resolve, reject) => {
       const existing = this.pending.get(key);
       if (existing) {
@@ -49,6 +51,7 @@ export class TranslationQueue {
         hash,
         targetLocale,
         context,
+        dynamic,
         resolvers: [resolve],
         rejecters: [reject],
       });
@@ -72,19 +75,24 @@ export class TranslationQueue {
     const items = Array.from(this.pending.values());
     this.pending.clear();
 
-    const byLocale = new Map<string, QueueItem[]>();
+    const byGroup = new Map<string, QueueItem[]>();
     for (const item of items) {
-      const list = byLocale.get(item.targetLocale) ?? [];
+      const key = `${item.targetLocale}:${item.dynamic ? "d" : "s"}`;
+      const list = byGroup.get(key) ?? [];
       list.push(item);
-      byLocale.set(item.targetLocale, list);
+      byGroup.set(key, list);
     }
 
-    for (const [locale, group] of byLocale) {
+    for (const group of byGroup.values()) {
+      const locale = group[0].targetLocale;
+      const dynamic = group[0].dynamic;
       try {
         const results = await this.client.translateBatch(
           group.map((i) => i.text),
           this.config.sourceLocale,
           locale,
+          undefined,
+          dynamic,
         );
         group.forEach((item, idx) => {
           const translated = results[idx]?.text ?? item.text;

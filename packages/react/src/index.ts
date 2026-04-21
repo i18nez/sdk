@@ -3,7 +3,7 @@ export type { I18nezProviderProps } from "./provider";
 export { useTranslation } from "./hooks/useTranslation";
 export { useLocale } from "./hooks/useLocale";
 export { T } from "./components/T";
-export type { TProps } from "./components/T";
+export type { TProps, TAnimation } from "./components/T";
 export { LocaleSwitcher } from "./components/LocaleSwitcher";
 export type { LocaleSwitcherProps } from "./components/LocaleSwitcher";
 export { TranslationBoundary } from "./components/TranslationBoundary";

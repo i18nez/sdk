@@ -155,6 +155,8 @@ export function I18nezProvider(props: I18nezProviderProps) {
         return interpolate(source, options?.params);
       }
 
+      const bundleReady = cache.hasBundle(activeLocale);
+
       const syncHash = hashTextSync(source);
       if (syncHash) {
         const activeHit = cache.get(syncHash, activeLocale);
@@ -163,8 +165,11 @@ export function I18nezProvider(props: I18nezProviderProps) {
           activeLocale !== fallbackActive
             ? cache.get(syncHash, fallbackActive)
             : null;
+        if (!bundleReady) {
+          return interpolate(fallbackHit ?? fallback, options?.params);
+        }
         void queue
-          .enqueue(source, syncHash, activeLocale, options?.context)
+          .enqueue(source, syncHash, activeLocale, options?.context, options?.dynamic)
           .then(bump)
           .catch(() => {});
         return interpolate(fallbackHit ?? fallback, options?.params);
@@ -176,8 +181,12 @@ export function I18nezProvider(props: I18nezProviderProps) {
           bump();
           return;
         }
+        if (!cache.hasBundle(activeLocale)) {
+          bump();
+          return;
+        }
         queue
-          .enqueue(source, h, activeLocale, options?.context)
+          .enqueue(source, h, activeLocale, options?.context, options?.dynamic)
           .then(bump)
           .catch(() => {});
       });
