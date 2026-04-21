@@ -10,8 +10,8 @@
     "msw:init": "msw init public --save"
   },
   "dependencies": {
-    "@i18nez/core": "workspace:*",
-    "@i18nez/react": "workspace:*",
+    "@i18nez/core": "^1.0.0",
+    "@i18nez/react": "^1.0.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
   },
