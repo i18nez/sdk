@@ -1,5 +1,11 @@
 # @i18nez/react
 
+## 1.1.1
+
+### Patch Changes
+
+- Fixed React 19 / StrictMode warning "Can't perform a state update on a component that hasn't mounted yet" triggered by `<T>` on first render. Provider's internal `bump()` now defers re-render scheduling to a microtask until the component is mounted.
+
 ## 1.1.0
 
 ### Minor Changes

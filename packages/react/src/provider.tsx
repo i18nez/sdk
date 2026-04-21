@@ -73,8 +73,22 @@ export function I18nezProvider(props: I18nezProviderProps) {
   const [status, setStatus] = useState<TranslationStatus>("initializing");
   const [renderTick, setRenderTick] = useState(0);
   const availableLocalesRef = useRef<Set<string>>(new Set());
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const bump = useCallback(() => {
+    if (!mountedRef.current) {
+      queueMicrotask(() => {
+        if (mountedRef.current) setRenderTick((n) => n + 1);
+      });
+      return;
+    }
     setRenderTick((n) => n + 1);
   }, []);
 
