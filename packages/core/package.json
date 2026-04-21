@@ -1,8 +1,16 @@
 {
   "name": "@i18nez/core",
-  "version": "0.1.0-alpha.1",
+  "version": "1.0.0",
   "description": "Framework-agnostic client for the i18nez translation API",
-  "keywords": ["i18n", "translation", "locale", "l10n", "react", "typescript", "i18nez"],
+  "keywords": [
+    "i18n",
+    "translation",
+    "locale",
+    "l10n",
+    "react",
+    "typescript",
+    "i18nez"
+  ],
   "homepage": "https://i18nez.dev",
   "repository": {
     "type": "git",
