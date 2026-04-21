@@ -71,7 +71,7 @@ export function I18nezProvider(props: I18nezProviderProps) {
 
   const [locale, setLocaleState] = useState(defaultLocale);
   const [status, setStatus] = useState<TranslationStatus>("initializing");
-  const [, setRenderTick] = useState(0);
+  const [renderTick, setRenderTick] = useState(0);
   const availableLocalesRef = useRef<Set<string>>(new Set());
 
   const bump = useCallback(() => {
@@ -120,11 +120,6 @@ export function I18nezProvider(props: I18nezProviderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    return () => {
-      queueRef.current?.destroy();
-    };
-  }, []);
 
   const setLocale = useCallback(
     (next: string) => {
@@ -156,28 +151,28 @@ export function I18nezProvider(props: I18nezProviderProps) {
       const activeLocale = locale;
       const fallbackActive = fallbackLocale ?? defaultLocale;
 
+      if (activeLocale === defaultLocale) {
+        return interpolate(source, options?.params);
+      }
+
       const syncHash = hashTextSync(source);
       if (syncHash) {
-        const hit =
-          cache.get(syncHash, activeLocale) ??
-          (activeLocale !== fallbackActive
+        const activeHit = cache.get(syncHash, activeLocale);
+        if (activeHit) return interpolate(activeHit, options?.params);
+        const fallbackHit =
+          activeLocale !== fallbackActive
             ? cache.get(syncHash, fallbackActive)
-            : null);
-        if (hit) return interpolate(hit, options?.params);
+            : null;
         void queue
           .enqueue(source, syncHash, activeLocale, options?.context)
           .then(bump)
           .catch(() => {});
-        return interpolate(fallback, options?.params);
+        return interpolate(fallbackHit ?? fallback, options?.params);
       }
 
       void hashText(source).then((h) => {
-        const hit =
-          cache.get(h, activeLocale) ??
-          (activeLocale !== fallbackActive
-            ? cache.get(h, fallbackActive)
-            : null);
-        if (hit) {
+        const activeHit = cache.get(h, activeLocale);
+        if (activeHit) {
           bump();
           return;
         }
@@ -201,7 +196,7 @@ export function I18nezProvider(props: I18nezProviderProps) {
       status,
       availableLocales: Array.from(availableLocalesRef.current),
     }),
-    [t, locale, setLocale, status],
+    [t, locale, setLocale, status, renderTick],
   );
 
   return <I18nezContext.Provider value={value}>{children}</I18nezContext.Provider>;

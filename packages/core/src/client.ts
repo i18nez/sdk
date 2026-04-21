@@ -116,7 +116,7 @@ export function createClient(config: I18nezCoreConfig): I18nezClient {
     async translate(text, sourceLocale, targetLocale, context) {
       return request<TranslationResult>({
         method: "POST",
-        path: "/translate",
+        path: "/api/v1/translate",
         body: {
           text,
           source_locale: sourceLocale,
@@ -127,9 +127,9 @@ export function createClient(config: I18nezCoreConfig): I18nezClient {
     },
 
     async translateBatch(texts, sourceLocale, targetLocale, context) {
-      const response = await request<{ results: TranslationResult[] }>({
+      const response = await request<{ translations: TranslationResult[] }>({
         method: "POST",
-        path: "/translate/batch",
+        path: "/api/v1/translate/batch",
         body: {
           texts,
           source_locale: sourceLocale,
@@ -137,13 +137,13 @@ export function createClient(config: I18nezCoreConfig): I18nezClient {
           ...(context !== undefined ? { context } : {}),
         },
       });
-      return response.results;
+      return response.translations;
     },
 
     async getBundle(targetLocale, since) {
       return request<BundleResult>({
         method: "GET",
-        path: "/translate/bundle",
+        path: "/api/v1/translate/bundle",
         query: { target_locale: targetLocale, since },
       });
     },
