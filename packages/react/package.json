@@ -1,6 +1,6 @@
 {
   "name": "@i18nez/react",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "React hooks and components for the i18nez translation API",
   "keywords": [
     "i18n",
@@ -34,7 +34,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "license": "MIT",
@@ -51,7 +52,7 @@
     "react-dom": ">=18.0.0"
   },
   "dependencies": {
-    "@i18nez/core": "^1.0.0"
+    "@i18nez/core": "^1.1.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

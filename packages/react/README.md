@@ -63,6 +63,29 @@ return <span>{t("Hello, {name}!", { params: { name: user.name } })}</span>;
 <T context="call-to-action">Get started</T>
 ```
 
+#### Animations
+
+`<T>` ships four zero-dep CSS presets that play whenever the translation changes (e.g. on locale switch). Default is `"none"`.
+
+```tsx
+<T animate="fade">Welcome back</T>           {/* 220ms cross-fade   */}
+<T animate="blur">Settings</T>               {/* 280ms blur → sharp */}
+<T animate="slide">Your cart</T>             {/* 240ms fade + up    */}
+<T animate="typewriter">Generating…</T>      {/* char-by-char       */}
+
+{/* Override duration (ms) per instance */}
+<T animate="slide" duration={400}>Checkout</T>
+```
+
+#### Dynamic content
+
+Pass `dynamic` for runtime-variable strings (product names, user-generated content, CMS bodies). These are translated on demand and cached in Redis for the session, but **never persisted to the locale bundle** — so your bundle stays lean even on apps with hundreds of thousands of unique strings.
+
+```tsx
+<T dynamic>{product.name}</T>
+<T dynamic>{product.description}</T>
+```
+
 ### `useLocale()`
 
 ```tsx

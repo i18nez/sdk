@@ -52,7 +52,7 @@ describe("createClient.translate", () => {
 
     expect(fetchFn).toHaveBeenCalledOnce();
     const [url, init] = fetchFn.mock.calls[0];
-    expect(url).toBe("https://api.i18nez.com/translate");
+    expect(url).toBe("https://api.i18nez.com/api/v1/translate");
     expect((init as RequestInit).method).toBe("POST");
     expect((init as RequestInit).headers).toMatchObject({
       Authorization: "Bearer sk_test",
@@ -160,7 +160,7 @@ describe("createClient.translateBatch", () => {
       {
         status: 200,
         body: {
-          results: [
+          translations: [
             { text: "Ciao", source: "Hello", cached: false },
             { text: "Grazie", source: "Thanks", cached: false },
           ],

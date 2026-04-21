@@ -151,10 +151,6 @@ export function I18nezProvider(props: I18nezProviderProps) {
       const activeLocale = locale;
       const fallbackActive = fallbackLocale ?? defaultLocale;
 
-      if (activeLocale === defaultLocale) {
-        return interpolate(source, options?.params);
-      }
-
       const bundleReady = cache.hasBundle(activeLocale);
 
       const syncHash = hashTextSync(source);

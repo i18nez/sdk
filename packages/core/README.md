@@ -11,7 +11,12 @@ npm install @i18nez/core
 ## Quickstart
 
 ```ts
-import { createClient, TranslationCache, TranslationQueue } from "@i18nez/core";
+import {
+  createClient,
+  TranslationCache,
+  TranslationQueue,
+  hashText,
+} from "@i18nez/core";
 
 const client = createClient({
   apiKey: "tlv_pub_...",
@@ -19,11 +24,22 @@ const client = createClient({
 });
 
 // One-shot translation
-const { text } = await client.translate({
-  text: "Welcome to our app",
-  sourceLocale: "en",
-  targetLocale: "it",
-});
+const { text } = await client.translate(
+  "Welcome to our app",
+  "en",
+  "it",
+);
+
+// Batch (optional `dynamic` flag: translate + Redis cache only,
+// no persistence to the locale bundle — perfect for product names,
+// user-generated content, etc.)
+const [ciao] = await client.translateBatch(
+  ["Hello world"],
+  "en",
+  "it",
+  /* context */ undefined,
+  /* dynamic */ true,
+);
 
 // Bulk-fetch a locale bundle
 const bundle = await client.getBundle("it");
@@ -35,7 +51,8 @@ const queue = new TranslationQueue(client, cache, {
   batchInterval: 50,
   batchSize: 10,
 });
-await queue.enqueue("Hello world", hash, "it");
+const hash = await hashText("Hello world");
+await queue.enqueue("Hello world", hash, "it", /* context */ undefined, /* dynamic */ false);
 ```
 
 ## Exports
