@@ -1,7 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { TranslationQueue } from "../src/queue";
 import { TranslationCache } from "../src/cache";
-import { QuotaExceededError, type TranslationResult } from "../src/types";
+import {
+  QuotaExceededError,
+  RateLimitedError,
+  type TranslationResult,
+} from "../src/types";
 import type { I18nezClient } from "../src/client";
 
 function stubClient(
@@ -48,7 +52,7 @@ describe("TranslationQueue", () => {
     q.destroy();
   });
 
-  it("flushes immediately when batch size is hit", async () => {
+  it("waits for the debounce window even when batch size is reached", async () => {
     const batch = vi.fn(async (texts: string[]) =>
       texts.map((t) => ({ text: `${t}!`, source: t, cached: false })),
     );
@@ -60,10 +64,69 @@ describe("TranslationQueue", () => {
       sourceLocale: "en",
     });
 
-    const p1 = q.enqueue("a", "h1", "it");
-    const p2 = q.enqueue("b", "h2", "it");
-    await Promise.all([p1, p2]);
+    q.enqueue("a", "h1", "it");
+    q.enqueue("b", "h2", "it");
+    expect(batch).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(50);
     expect(batch).toHaveBeenCalledOnce();
+    q.destroy();
+  });
+
+  it("chunks oversized batches into sequential requests (no parallel burst)", async () => {
+    let inFlight = 0;
+    let maxConcurrent = 0;
+    const batch = vi.fn(async (texts: string[]) => {
+      inFlight++;
+      maxConcurrent = Math.max(maxConcurrent, inFlight);
+      await new Promise((r) => setTimeout(r, 10));
+      inFlight--;
+      return texts.map((t) => ({ text: `${t}!`, source: t, cached: false }));
+    });
+    const client = stubClient(batch);
+    const cache = new TranslationCache();
+    const q = new TranslationQueue(client, cache, {
+      batchInterval: 50,
+      batchSize: 10,
+      sourceLocale: "en",
+    });
+
+    const promises = Array.from({ length: 25 }, (_, i) =>
+      q.enqueue(`t${i}`, `h${i}`, "it"),
+    );
+    await vi.advanceTimersByTimeAsync(50);
+    await vi.runAllTimersAsync();
+    await Promise.all(promises);
+
+    expect(batch).toHaveBeenCalledTimes(3);
+    expect(batch.mock.calls[0][0]).toHaveLength(10);
+    expect(batch.mock.calls[1][0]).toHaveLength(10);
+    expect(batch.mock.calls[2][0]).toHaveLength(5);
+    expect(maxConcurrent).toBe(1);
+    q.destroy();
+  });
+
+  it("retries on RateLimitedError respecting retryAfter", async () => {
+    let calls = 0;
+    const batch = vi.fn(async (texts: string[]) => {
+      calls++;
+      if (calls === 1) throw new RateLimitedError(2);
+      return texts.map((t) => ({ text: `${t}!`, source: t, cached: false }));
+    });
+    const client = stubClient(batch);
+    const cache = new TranslationCache();
+    const q = new TranslationQueue(client, cache, {
+      batchInterval: 50,
+      batchSize: 10,
+      sourceLocale: "en",
+    });
+
+    const p = q.enqueue("Hi", "h1", "it");
+    await vi.advanceTimersByTimeAsync(50);
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.runAllTimersAsync();
+    const result = await p;
+    expect(result).toBe("Hi!");
+    expect(batch).toHaveBeenCalledTimes(2);
     q.destroy();
   });
 

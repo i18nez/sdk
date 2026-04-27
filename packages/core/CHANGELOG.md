@@ -1,5 +1,13 @@
 # @i18nez/core
 
+## 1.2.0
+
+### Minor Changes
+
+- `TranslationQueue` no longer flushes immediately when `batchSize` is reached — it always waits for the debounce window and serializes flushes via an internal in-flight chain. This collapses an entire page of `t()` calls into a single window and prevents parallel request bursts that triggered server-side 429s.
+- Oversized batches (more than `batchSize` items) are split into chunks and dispatched **sequentially**, so a page with 200 strings produces ⌈200/batchSize⌉ ordered requests instead of a parallel burst.
+- Automatic retry on `RateLimitedError`: the queue now respects the server's `Retry-After` (with exponential-backoff fallback, max 3 attempts) before surfacing a 429 to callers.
+
 ## 1.1.0
 
 ### Minor Changes

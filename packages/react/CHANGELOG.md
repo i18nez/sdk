@@ -1,5 +1,16 @@
 # @i18nez/react
 
+## 1.2.0
+
+### Minor Changes
+
+- `I18nezProvider` defaults bumped to `batchInterval: 100` (was 50) and `batchSize: 50` (was 10). The new defaults match the server's `BATCH_MAX_SIZE` and give the debounce window enough room to coalesce StrictMode double-renders into a single batch — drastically reducing 429s on dense pages.
+
+### Patch Changes
+
+- Updated dependencies
+  - @i18nez/core@1.2.0
+
 ## 1.1.1
 
 ### Patch Changes

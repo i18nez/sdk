@@ -1,5 +1,6 @@
 import type { I18nezClient } from "./client";
 import type { TranslationCache } from "./cache";
+import { RateLimitedError } from "./types";
 
 interface QueueItem {
   text: string;
@@ -15,12 +16,14 @@ interface QueueConfig {
   batchInterval: number;
   batchSize: number;
   sourceLocale: string;
+  maxRetries?: number;
 }
 
 export class TranslationQueue {
   private pending = new Map<string, QueueItem>();
   private timer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
+  private inflight: Promise<void> = Promise.resolve();
 
   constructor(
     private client: I18nezClient,
@@ -55,9 +58,7 @@ export class TranslationQueue {
         resolvers: [resolve],
         rejecters: [reject],
       });
-      if (this.pending.size >= this.config.batchSize) {
-        void this.flush();
-      } else if (!this.timer) {
+      if (!this.timer) {
         this.timer = setTimeout(() => {
           void this.flush();
         }, this.config.batchInterval);
@@ -65,7 +66,13 @@ export class TranslationQueue {
     });
   }
 
-  async flush(): Promise<void> {
+  flush(): Promise<void> {
+    const next = this.inflight.then(() => this.doFlush());
+    this.inflight = next.catch(() => {});
+    return next;
+  }
+
+  private async doFlush(): Promise<void> {
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
@@ -84,25 +91,45 @@ export class TranslationQueue {
     }
 
     for (const group of byGroup.values()) {
-      const locale = group[0].targetLocale;
-      const dynamic = group[0].dynamic;
+      for (let i = 0; i < group.length; i += this.config.batchSize) {
+        const chunk = group.slice(i, i + this.config.batchSize);
+        await this.sendChunk(chunk);
+      }
+    }
+  }
+
+  private async sendChunk(chunk: QueueItem[]): Promise<void> {
+    const locale = chunk[0].targetLocale;
+    const dynamic = chunk[0].dynamic;
+    const maxRetries = this.config.maxRetries ?? 3;
+    let attempt = 0;
+
+    while (true) {
       try {
         const results = await this.client.translateBatch(
-          group.map((i) => i.text),
+          chunk.map((i) => i.text),
           this.config.sourceLocale,
           locale,
           undefined,
           dynamic,
         );
-        group.forEach((item, idx) => {
+        chunk.forEach((item, idx) => {
           const translated = results[idx]?.text ?? item.text;
           this.cache.set(item.hash, item.targetLocale, translated);
           item.resolvers.forEach((r) => r(translated));
         });
+        return;
       } catch (err) {
-        group.forEach((item) => {
+        if (err instanceof RateLimitedError && attempt < maxRetries) {
+          attempt++;
+          const waitSeconds = err.retryAfter > 0 ? err.retryAfter : 2 ** attempt;
+          await sleep(waitSeconds * 1000);
+          continue;
+        }
+        chunk.forEach((item) => {
           item.rejecters.forEach((rej) => rej(err));
         });
+        return;
       }
     }
   }
@@ -118,4 +145,8 @@ export class TranslationQueue {
     }
     this.pending.clear();
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

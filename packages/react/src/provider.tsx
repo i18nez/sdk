@@ -45,8 +45,8 @@ export function I18nezProvider(props: I18nezProviderProps) {
     preloadLocales,
     context: globalContext,
     persistence,
-    batchInterval = 50,
-    batchSize = 10,
+    batchInterval = 100,
+    batchSize = 50,
     children,
   } = props;
 
