@@ -2,7 +2,7 @@
 
 React hooks and components for the [i18nez](https://i18nez.dev) translation API.
 
-Drop-in i18n for React apps. Wrap your tree once, write English in your JSX, and i18nez translates on the fly into every locale you target. Translations are cached per-tenant and distributed to every user of your app — you pay for the translation once, not once per user.
+Drop-in i18n for React apps. Wrap your tree once, write English in your JSX, and i18nez translates on the fly into every locale you target. Translations are cached per-tenant and distributed to every user of your app, you pay for the translation once, not once per user.
 
 ```bash
 npm install @i18nez/react @i18nez/core
@@ -36,12 +36,12 @@ On first render i18nez fetches the translation bundle for the active locale. Mis
 <I18nezProvider
   apiKey="tlv_pub_..."         // public key (safe in client)
   defaultLocale="en"
-  fallbackLocale="en"          // optional — used when target has no translation
+  fallbackLocale="en"          // optional, used when target has no translation
   apiUrl="https://api.i18nez.dev"  // optional override
-  preloadLocales={["it","fr"]} // optional — warm caches at boot
-  context="e-commerce product page"  // optional — guides the LLM
+  preloadLocales={["it","fr"]} // optional, warm caches at boot
+  context="e-commerce product page"  // optional, guides the LLM
   tone="friendly"
-  persistence={localStorageAdapter}  // optional — persist bundles across reloads
+  persistence={localStorageAdapter}  // optional, persist bundles across reloads
 />
 ```
 
@@ -79,7 +79,7 @@ return <span>{t("Hello, {name}!", { params: { name: user.name } })}</span>;
 
 #### Dynamic content
 
-Pass `dynamic` for runtime-variable strings (product names, user-generated content, CMS bodies). These are translated on demand and cached in Redis for the session, but **never persisted to the locale bundle** — so your bundle stays lean even on apps with hundreds of thousands of unique strings.
+Pass `dynamic` for runtime-variable strings (product names, user-generated content, CMS bodies). These are translated on demand and cached in Redis for the session, but **never persisted to the locale bundle**, so your bundle stays lean even on apps with hundreds of thousands of unique strings.
 
 ```tsx
 <T dynamic>{product.name}</T>
@@ -108,9 +108,9 @@ const [locale, setLocale] = useLocale();
 
 ## How it works
 
-1. First render — `<T>Welcome</T>` emits the source text; i18nez hashes it, checks the local cache, shows the source as fallback, and enqueues a translation request.
-2. Response arrives — cache is updated, the tree re-renders with the translated text.
-3. Next session — the persisted bundle is loaded synchronously; translations appear without any network round-trip.
+1. First render, `<T>Welcome</T>` emits the source text; i18nez hashes it, checks the local cache, shows the source as fallback, and enqueues a translation request.
+2. Response arrives, cache is updated, the tree re-renders with the translated text.
+3. Next session, the persisted bundle is loaded synchronously; translations appear without any network round-trip.
 
 Dynamic content (user-generated, backend data) is hashed and translated on-demand the first time it's seen; all subsequent users of your app get the cached translation from the edge.
 

@@ -188,6 +188,61 @@ describe("TranslationQueue", () => {
     q.destroy();
   });
 
+  it("groups by context and forwards it to the batch call", async () => {
+    const batch = vi.fn(
+      async (
+        texts: string[],
+        _src: string,
+        _tgt: string,
+        _context?: string,
+      ) => texts.map((t) => ({ text: `${t}-x`, source: t, cached: false })),
+    );
+    const client = stubClient(async (texts) =>
+      texts.map((t) => ({ text: `${t}-x`, source: t, cached: false })),
+    );
+    (client.translateBatch as unknown as typeof batch) = batch;
+    const cache = new TranslationCache();
+    const q = new TranslationQueue(client, cache, {
+      batchInterval: 50,
+      batchSize: 10,
+      sourceLocale: "en",
+    });
+
+    const p1 = q.enqueue("left", "h1", "it", "remaining time");
+    const p2 = q.enqueue("right", "h2", "it", "direction");
+    const p3 = q.enqueue("home", "h3", "it");
+
+    await vi.advanceTimersByTimeAsync(50);
+    await vi.runAllTimersAsync();
+    await Promise.all([p1, p2, p3]);
+
+    expect(batch).toHaveBeenCalledTimes(3);
+    const ctxArgs = new Set(batch.mock.calls.map((c) => c[3]));
+    expect(ctxArgs).toEqual(new Set([undefined, "direction", "remaining time"]));
+    q.destroy();
+  });
+
+  it("does NOT dedupe identical hash+locale when contexts differ", async () => {
+    const batch = vi.fn(async (texts: string[]) =>
+      texts.map((t) => ({ text: `${t}!`, source: t, cached: false })),
+    );
+    const client = stubClient(batch);
+    const cache = new TranslationCache();
+    const q = new TranslationQueue(client, cache, {
+      batchInterval: 50,
+      batchSize: 10,
+      sourceLocale: "en",
+    });
+
+    const p1 = q.enqueue("left", "h1", "it", "remaining time");
+    const p2 = q.enqueue("left", "h1", "it", "direction");
+    await vi.advanceTimersByTimeAsync(50);
+    await vi.runAllTimersAsync();
+    await Promise.all([p1, p2]);
+    expect(batch).toHaveBeenCalledTimes(2);
+    q.destroy();
+  });
+
   it("flush() forces pending queue out", async () => {
     const batch = vi.fn(async (texts: string[]) =>
       texts.map((t) => ({ text: t, source: t, cached: false })),

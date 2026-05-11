@@ -68,12 +68,16 @@ export function createClient(config: I18nezCoreConfig): I18nezClient {
       const timer = setTimeout(() => controller.abort(), timeout);
       let res: Response;
       try {
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${config.apiKey}`,
+          "Content-Type": "application/json",
+        };
+        if (config.clientBundle) {
+          headers["X-Client-Bundle"] = config.clientBundle;
+        }
         res = await fetch(url, {
           method: opts.method,
-          headers: {
-            Authorization: `Bearer ${config.apiKey}`,
-            "Content-Type": "application/json",
-          },
+          headers,
           body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
           signal: controller.signal,
         });

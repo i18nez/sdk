@@ -9,6 +9,10 @@ export interface I18nezCoreConfig {
   batchSize?: number;
   retries?: number;
   timeout?: number;
+  // App bundle ID (iOS bundle ID / Android package name). Sent as
+  // `X-Client-Bundle` header so the API can enforce the per-key bundle
+  // allowlist on mobile (React Native, etc.) where there's no Origin header.
+  clientBundle?: string;
 }
 
 export interface TranslateOptions {

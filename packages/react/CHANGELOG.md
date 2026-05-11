@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- `I18nezProvider` defaults bumped to `batchInterval: 100` (was 50) and `batchSize: 50` (was 10). The new defaults match the server's `BATCH_MAX_SIZE` and give the debounce window enough room to coalesce StrictMode double-renders into a single batch — drastically reducing 429s on dense pages.
+- `I18nezProvider` defaults bumped to `batchInterval: 100` (was 50) and `batchSize: 50` (was 10). The new defaults match the server's `BATCH_MAX_SIZE` and give the debounce window enough room to coalesce StrictMode double-renders into a single batch, drastically reducing 429s on dense pages.
 
 ### Patch Changes
 
@@ -21,9 +21,9 @@
 
 ### Minor Changes
 
-- `<T>` now supports an `animate` prop with four CSS-only presets — `fade`, `blur`, `slide`, `typewriter` — playing whenever the translation changes. Optional `duration` (ms) per instance. Default is `none`.
-- `<T>` exposes a `dynamic` prop. When set, the translation is served from the session cache but excluded from the locale bundle — keeps bundles lean on apps with runtime-variable content (e-commerce SKUs, UGC, CMS).
-- Provider now gates enqueues on the locale bundle being loaded — no more wasteful batch requests for strings that are about to arrive in the bundle.
+- `<T>` now supports an `animate` prop with four CSS-only presets, `fade`, `blur`, `slide`, `typewriter`, playing whenever the translation changes. Optional `duration` (ms) per instance. Default is `none`.
+- `<T>` exposes a `dynamic` prop. When set, the translation is served from the session cache but excluded from the locale bundle, keeps bundles lean on apps with runtime-variable content (e-commerce SKUs, UGC, CMS).
+- Provider now gates enqueues on the locale bundle being loaded, no more wasteful batch requests for strings that are about to arrive in the bundle.
 - Fixed invalid-hook-call / StrictMode regressions that could kill the translation queue after the first dev-mode double mount.
 - Context value now re-emits on internal bumps so consumers re-render when a translation lands.
 

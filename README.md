@@ -47,4 +47,4 @@ Pick the package(s), bump type (patch/minor/major), and write a short user-facin
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT, see [LICENSE](./LICENSE).

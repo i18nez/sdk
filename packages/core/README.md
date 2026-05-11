@@ -31,7 +31,7 @@ const { text } = await client.translate(
 );
 
 // Batch (optional `dynamic` flag: translate + Redis cache only,
-// no persistence to the locale bundle — perfect for product names,
+// no persistence to the locale bundle, perfect for product names,
 // user-generated content, etc.)
 const [ciao] = await client.translateBatch(
   ["Hello world"],
@@ -69,7 +69,7 @@ await queue.enqueue("Hello world", hash, "it", /* context */ undefined, /* dynam
 
 ## Persistence
 
-Provide any adapter matching the `PersistenceAdapter` interface — localStorage, AsyncStorage, IndexedDB, SQLite:
+Provide any adapter matching the `PersistenceAdapter` interface, localStorage, AsyncStorage, IndexedDB, SQLite:
 
 ```ts
 const adapter: PersistenceAdapter = {

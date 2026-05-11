@@ -33,6 +33,10 @@ export interface I18nezProviderProps {
   persistence?: PersistenceAdapter;
   batchInterval?: number;
   batchSize?: number;
+  // Mobile/native: app bundle ID (iOS bundle ID / Android package name) used
+  // by the API to enforce per-key bundle allowlists. On React Native, pass the
+  // value from `react-native-device-info` (`getBundleId()`).
+  clientBundle?: string;
   children: ReactNode;
 }
 
@@ -47,6 +51,7 @@ export function I18nezProvider(props: I18nezProviderProps) {
     persistence,
     batchInterval = 100,
     batchSize = 50,
+    clientBundle,
     children,
   } = props;
 
@@ -60,6 +65,7 @@ export function I18nezProvider(props: I18nezProviderProps) {
       apiUrl,
       defaultLocale,
       context: globalContext,
+      clientBundle,
     });
     cacheRef.current = new TranslationCache(persistence);
     queueRef.current = new TranslationQueue(

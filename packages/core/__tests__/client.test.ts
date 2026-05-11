@@ -58,11 +58,29 @@ describe("createClient.translate", () => {
       Authorization: "Bearer sk_test",
       "Content-Type": "application/json",
     });
+    expect((init as RequestInit).headers).not.toHaveProperty("X-Client-Bundle");
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body).toEqual({
       text: "Hello",
       source_locale: "en",
       target_locale: "it",
+    });
+  });
+
+  it("sends X-Client-Bundle when clientBundle is configured", async () => {
+    const fetchFn = mockFetch([
+      { status: 200, body: { text: "Ciao", source: "Hello", cached: false } },
+    ]);
+    const client = createClient({
+      apiKey: "tlv_pub_xxx",
+      defaultLocale: "en",
+      clientBundle: "com.acme.app",
+    });
+    await client.translate("Hello", "en", "it");
+
+    const [, init] = fetchFn.mock.calls[0];
+    expect((init as RequestInit).headers).toMatchObject({
+      "X-Client-Bundle": "com.acme.app",
     });
   });
 

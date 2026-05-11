@@ -41,7 +41,8 @@ export class TranslationQueue {
     if (this.destroyed) {
       return Promise.reject(new Error("Queue destroyed"));
     }
-    const key = `${targetLocale}:${dynamic ? "d:" : "s:"}${hash}`;
+    const ctxKey = context ?? "";
+    const key = `${targetLocale}:${dynamic ? "d:" : "s:"}${ctxKey}:${hash}`;
     return new Promise<string>((resolve, reject) => {
       const existing = this.pending.get(key);
       if (existing) {
@@ -84,7 +85,7 @@ export class TranslationQueue {
 
     const byGroup = new Map<string, QueueItem[]>();
     for (const item of items) {
-      const key = `${item.targetLocale}:${item.dynamic ? "d" : "s"}`;
+      const key = `${item.targetLocale}:${item.dynamic ? "d" : "s"}:${item.context ?? ""}`;
       const list = byGroup.get(key) ?? [];
       list.push(item);
       byGroup.set(key, list);
@@ -101,6 +102,7 @@ export class TranslationQueue {
   private async sendChunk(chunk: QueueItem[]): Promise<void> {
     const locale = chunk[0].targetLocale;
     const dynamic = chunk[0].dynamic;
+    const context = chunk[0].context;
     const maxRetries = this.config.maxRetries ?? 3;
     let attempt = 0;
 
@@ -110,7 +112,7 @@ export class TranslationQueue {
           chunk.map((i) => i.text),
           this.config.sourceLocale,
           locale,
-          undefined,
+          context,
           dynamic,
         );
         chunk.forEach((item, idx) => {

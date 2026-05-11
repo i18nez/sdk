@@ -35,7 +35,7 @@ confirm the observed behavior matches the expectation:
 ### Static <T>
 - [ ] On first paint, English text appears ("Hello", "Welcome", "Add to cart").
 - [ ] Within ~100 ms, translations update to the default locale `en` (unchanged
-      here — the bundle contains identity mappings).
+      here, the bundle contains identity mappings).
 - [ ] Switch the header `LocaleSwitcher` to `it`. All three items flip to
       "Ciao", "Benvenuto", "Aggiungi al carrello".
 - [ ] Flip through every locale. No flicker or stale text.
@@ -82,10 +82,10 @@ confirm the observed behavior matches the expectation:
 
 ## Troubleshooting
 
-- **"Cannot find module '@i18nez/react'"** — run `bun install` at the repo root
+- **"Cannot find module '@i18nez/react'"**, run `bun install` at the repo root
   so bun workspaces re-link, then rebuild the SDK (`bun run --cwd packages/react build`).
-- **"Service worker registration failed"** — delete
+- **"Service worker registration failed"**, delete
   `public/mockServiceWorker.js` and rerun `bun run msw:init` inside this
   directory.
-- **Network errors for `mock.i18nez.test`** — MSW didn't start. Check the dev
+- **Network errors for `mock.i18nez.test`**, MSW didn't start. Check the dev
   console for "[MSW] Mocking enabled".

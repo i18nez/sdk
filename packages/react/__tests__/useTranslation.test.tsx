@@ -50,7 +50,7 @@ describe("useTranslation", () => {
   });
 
   it("interpolates {param} tokens in translated text", async () => {
-    // SHA-256 hash for the source string below — computed at runtime by the test
+    // SHA-256 hash for the source string below, computed at runtime by the test
     // We rely on the hash library to compute this; the bundle response here uses
     // a placeholder and we replace it with the real hash at setup time.
     const source = "Hello, {name}!";
